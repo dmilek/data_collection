@@ -1,0 +1,43 @@
+name: Daily Scraper
+
+# This action will run daily at 02:00 UTC.
+on:
+  schedule:
+    - cron: '0 2 * * *'
+
+jobs:
+  scrape-and-commit:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the repository.
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      # Step 2: Set up JDK version 23 for running the Java project.
+      - name: Set up JDK 23
+        uses: actions/setup-java@v2
+        with:
+          java-version: '23'
+
+      # Step 3: Build and run the Java scraper script.
+      - name: Run DailyScraper
+        run: |
+          mvn clean compile
+          mvn exec:java -Dexec.mainClass="general_utils.DailyScraper"
+
+      # Step 4: Set the Git user for committing changes.
+      - name: Set Git user
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+
+      # Step 5: Commit and push the CSV file back to the repository.
+      - name: Commit and push changes
+        run: |
+          git add scraped_numbers.csv
+          git commit -m "Update scraped numbers on $(date)"
+          git push
+        env:
+          # Use GitHub token for authentication (automatically provided by GitHub).
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
