@@ -1,6 +1,6 @@
 # Daily Number Scraper
 
-This Java project scrapes lottery numbers from the Lutrija website and saves them into a CSV file for further analysis. The project uses the OkHttp library for making HTTP requests and Jsoup for parsing HTML content.
+This Java project scrapes  numbers from the URL website and saves them into a CSV file for further analysis. The project uses the OkHttp library for making HTTP requests and Jsoup for parsing HTML content.
 
 ## Table of Contents
 - [Features](#features)
