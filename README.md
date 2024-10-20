@@ -6,9 +6,6 @@ This Java project scrapes  numbers from the URL website and saves them into a CS
 - [Features](#features)
 - [Technologies](#technologies)
 - [Getting Started](#getting-started)
-- [Usage](#usage)
-- [Contributing](#contributing)
-- [License](#license)
 
 ## Features
 - Scrapes numbers from the specified URL.
