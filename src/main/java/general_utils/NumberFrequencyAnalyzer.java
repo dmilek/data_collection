@@ -27,7 +27,8 @@ public class NumberFrequencyAnalyzer {
             CsvAnalyzer.printSortedNumbers(numberFrequency);
 
             // Call the HtmlReportGenerator to generate the HTML report (static method call)
-            HtmlReportGenerator.generateHtmlReport(numberFrequency);
+            String htmlReport = HtmlReportGenerator.generateHtmlReport(numberFrequency);
+            logger.info(htmlReport); // Output the HTML report to console for GitHub Actions to capture
 
         } catch (IOException e) {
             logger.error("Error reading the CSV file: ", e);
