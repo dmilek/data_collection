@@ -23,16 +23,10 @@ jobs:
     - name: Build Project
       run: mvn clean package
       
-    - name: Run Analyzer and Capture HTML Report
+    - name: Run Analyzer
       id: run_analyzer
       run: |
-        # Run the Java application and capture output, while redirecting logger output to a file
-        mvn exec:java -Dexec.mainClass="general_utils.NumberFrequencyAnalyzer" | tee report.log
-        
-        # Extract the HTML report from the logs using grep
-        html_report=$(grep -oP "(?<=Generated HTML Report: ).*" report.log)
-        
-        # Set the output variable
+        html_report=$(mvn exec:java -Dexec.mainClass="general_utils.NumberFrequencyAnalyzer" | grep "<html")
         echo "::set-output name=html_report::$html_report"
 
     - name: Send Email
