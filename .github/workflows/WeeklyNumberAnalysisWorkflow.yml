@@ -1,4 +1,4 @@
-name: Weekly Number Analysis Workflow
+name: Weekly Number Analysis
 
 on:
   schedule:
@@ -34,6 +34,6 @@ jobs:
         username: ${{ secrets.EMAIL_USERNAME }}
         password: ${{ secrets.EMAIL_PASSWORD }}
         subject: 'Weekly Number Analysis'
-        content_type: 'text/html'
-        body: ${{ steps.generate_html_report.outputs.html_report }}
-        to: ${{ secrets.EMAIL_RECIPIENT }}  # Replace with recipient's email
+        from: 'notification.service1988@gmail.com'  # Your sender email address
+        html_body: ${{ steps.generate_html_report.outputs.html_report }}  # Use the variable from your report generation step
+        to:  ${{ secrets.EMAIL_RECIPIENT }} # Replace with recipient's email
