@@ -26,11 +26,11 @@ jobs:
     - name: Run Analyzer and Capture HTML Report
       id: run_analyzer
       run: |
-        # Run the Java application and capture output to a file
-        mvn exec:java -Dexec.mainClass="general_utils.NumberFrequencyAnalyzer" | tee report.html
+        # Run the Java application and capture output, while redirecting logger output to a file
+        mvn exec:java -Dexec.mainClass="general_utils.NumberFrequencyAnalyzer" | tee report.log
         
-        # Read the content of the HTML report
-        html_report=$(<report.html)
+        # Extract the HTML report from the logs using grep
+        html_report=$(grep -oP "(?<=Generated HTML Report: ).*" report.log)
         
         # Set the output variable
         echo "::set-output name=html_report::$html_report"
