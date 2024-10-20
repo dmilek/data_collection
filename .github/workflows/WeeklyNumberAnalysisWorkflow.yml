@@ -36,4 +36,4 @@ jobs:
         subject: 'Weekly Number Analysis'
         content_type: 'text/html'
         body: ${{ steps.generate_html_report.outputs.html_report }}
-        to: ${{ secrets.EMAIL_SENDER }}  # Replace with recipient's email
+        to: ${{ secrets.EMAIL_RECIPIENT }}  # Replace with recipient's email
