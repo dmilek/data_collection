@@ -22,9 +22,12 @@ jobs:
 
     - name: Build Project
       run: mvn clean package
-
-    - name: Run Analyzer
-      run: mvn exec:java -Dexec.mainClass="general_utils.NumberFrequencyAnalyzer"
+      
+    - name: Run Analyzer and Capture HTML Report
+      id: run_analyzer
+      run: |
+        html_report=$(mvn exec:java -Dexec.mainClass="general_utils.NumberFrequencyAnalyzer" | grep "<html") # Adjust based on your output format
+        echo "::set-output name=html_report::$html_report"
 
     - name: Send Email
       uses: dawidd6/action-send-mail@v3
@@ -35,5 +38,5 @@ jobs:
         password: ${{ secrets.EMAIL_PASSWORD }}
         subject: 'Weekly Number Analysis'
         from: 'notification.service1988@gmail.com'  # Your sender email address
-        html_body: ${{ steps.generate_html_report.outputs.html_report }}  # Use the variable from your report generation step
+        html_body: ${{ steps.run_analyzer.outputs.html_report }}  # Use captured HTML
         to:  ${{ secrets.EMAIL_RECIPIENT }} # Replace with recipient's email
