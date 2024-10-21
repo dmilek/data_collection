@@ -42,6 +42,6 @@ jobs:
         username: ${{ secrets.EMAIL_USERNAME }}
         password: ${{ secrets.EMAIL_PASSWORD }}
         subject: 'Weekly Number Analysis'
-        from: 'notification.service1988@gmail.com'  # Your sender email address
+        from: 'Notification Service <notification.service1988@gmail.com>'  # Your sender email address
         html_body: ${{ env.html_report }}  # Use the captured HTML report
         to:  ${{ secrets.EMAIL_RECIPIENT }} # Replace with recipient's email
