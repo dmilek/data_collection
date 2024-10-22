@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static general_utils.ShutdownClient.shutdownClient;
+
 public class Scraper {
     private static final Logger logger = LogManager.getLogger(Scraper.class);
     private static final String URL = "https://www.lutrija.hr/lotoigre/sve-ili-nista"; // Scraping URL
@@ -58,6 +60,9 @@ public class Scraper {
             } else {
                 logger.info("The response body is null.");
             }
+        } finally {
+            // Ensure the OkHttp client is properly shut down to release all resources
+            shutdownClient(client);
         }
 
         return numbers;
