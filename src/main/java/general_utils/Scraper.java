@@ -17,14 +17,17 @@ import static general_utils.ShutdownClient.shutdownClient;
 public class Scraper {
     private static final Logger logger = LogManager.getLogger(Scraper.class);
     private static final String URL = "https://www.lutrija.hr/lotoigre/sve-ili-nista"; // Scraping URL
+
+    // Use a singleton instance for OkHttpClient to reduce resource overhead
+    private static final OkHttpClient client = new OkHttpClient.Builder()
+            .retryOnConnectionFailure(false)
+            .build();
+
     private Scraper(){
     }
     // Number scraping function
     public static List<Integer> scrapeNumbers() throws IOException {
         List<Integer> numbers = new ArrayList<>();
-
-        // Create an OkHttp client
-        OkHttpClient client = new OkHttpClient();
 
         // Create a request
         Request request = new Request.Builder()
