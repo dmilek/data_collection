@@ -41,20 +41,30 @@ public class CsvAnalyzer {
         }
     }
 
-    // New Method: Find all subsequences of length 2 or more
-    public static List<List<Integer>> findSubsequences(List<Integer> list) {
+    public static List<List<Integer>> findNonContiguousSubsequences(List<Integer> list) {
         List<List<Integer>> subsequences = new ArrayList<>();
+        int n = list.size();
 
-        // Generate all possible subsequences (at least length 2)
-        for (int i = 0; i < list.size(); i++) {
-            for (int j = i + 1; j <= list.size(); j++) {
-                List<Integer> sublist = list.subList(i, j);
-                if (sublist.size() > 1) {
-                    subsequences.add(new ArrayList<>(sublist));
-                }
-            }
+        // Iterate over all subsequences of length 2 or more
+        for (int len = 2; len <= n; len++) {
+            findSubsequencesOfLength(list, new ArrayList<>(), 0, len, subsequences);
         }
+
         return subsequences;
+    }
+
+    // Helper function to generate subsequences of a specific length
+    private static void findSubsequencesOfLength(List<Integer> list, List<Integer> current, int start, int len, List<List<Integer>> result) {
+        if (current.size() == len) {
+            result.add(new ArrayList<>(current));
+            return;
+        }
+
+        for (int i = start; i < list.size(); i++) {
+            current.add(list.get(i));
+            findSubsequencesOfLength(list, current, i + 1, len, result);
+            current.removeLast(); // Backtrack
+        }
     }
 
     // Analyze subsequences across multiple rows and return frequency of each subsequence
@@ -62,7 +72,7 @@ public class CsvAnalyzer {
         Map<String, Integer> subsequenceMap = new HashMap<>();
 
         for (List<Integer> row : rows) {
-            List<List<Integer>> subsequences = findSubsequences(row);
+            List<List<Integer>> subsequences = findNonContiguousSubsequences(row);
 
             // Add subsequences to the map and count their occurrences
             for (List<Integer> subsequence : subsequences) {
@@ -74,13 +84,21 @@ public class CsvAnalyzer {
         return subsequenceMap;
     }
 
-    // Print only subsequences that appear more than once
+    // Get sorted subsequences by frequency (Static method)
+    public static List<Map.Entry<String, Integer>> getSortedFrequentSubsequences(Map<String, Integer> subsequenceMap) {
+        // Only include subsequences that appear more than once
+        // Sort by frequency, descending
+        return subsequenceMap.entrySet().stream()
+                .filter(entry -> entry.getValue() > 1) // Only include subsequences that appear more than once
+                .sorted((entry1, entry2) -> entry2.getValue().compareTo(entry1.getValue())) // Sort by frequency, descending
+                .toList();
+    }
+    // Print only subsequences that appear more than once, sorted by frequency
     public static void printFrequentSubsequences(Map<String, Integer> subsequenceMap) {
-        logger.info("Subsequences that appear more than once:");
-        for (Map.Entry<String, Integer> entry : subsequenceMap.entrySet()) {
-            if (entry.getValue() > 1) {  // Print only if subsequence appears more than once
-                logger.info("Subsequence {} appears {} times.", entry.getKey(), entry.getValue());
-            }
-        }
+        logger.info("Subsequences that appear more than once (sorted by frequency):");
+        List<Map.Entry<String, Integer>> frequentSubsequences = getSortedFrequentSubsequences(subsequenceMap);
+        frequentSubsequences.forEach(entry ->
+                logger.info("Subsequence {} appears {} times.", entry.getKey(), entry.getValue())
+        );
     }
 }

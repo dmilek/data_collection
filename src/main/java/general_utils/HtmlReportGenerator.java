@@ -39,7 +39,7 @@ public class HtmlReportGenerator {
         htmlContent.append("<table>");
         htmlContent.append("<tr><th>Number</th><th>Frequency</th></tr>");
 
-        // Filling the table with number frequency data
+        // Filling the table with sorted number frequency data
         List<Map.Entry<Integer, Integer>> sortedNumbers = CsvAnalyzer.getSortedNumbers(numberFrequency);
         for (Map.Entry<Integer, Integer> entry : sortedNumbers) {
             htmlContent.append("<tr>")
@@ -54,14 +54,14 @@ public class HtmlReportGenerator {
         htmlContent.append("<table>");
         htmlContent.append("<tr><th>Subsequence</th><th>Frequency</th></tr>");
 
-        // Filling the table with subsequence data (only those that appear more than once)
-        for (Map.Entry<String, Integer> entry : subsequenceFrequency.entrySet()) {
-            if (entry.getValue() > 1) {
-                htmlContent.append("<tr>")
-                        .append("<td>").append(entry.getKey()).append(TD_CLOSE)
-                        .append("<td>").append(entry.getValue()).append(TD_CLOSE)
-                        .append("</tr>");
-            }
+        // Sort the subsequence data by frequency in descending order and only include those that appear more than once
+        List<Map.Entry<String, Integer>> sortedSubsequences = CsvAnalyzer.getSortedFrequentSubsequences(subsequenceFrequency);
+        // Filling the table with sorted subsequence data
+        for (Map.Entry<String, Integer> entry : sortedSubsequences) {
+            htmlContent.append("<tr>")
+                    .append("<td>").append(entry.getKey()).append(TD_CLOSE)
+                    .append("<td>").append(entry.getValue()).append(TD_CLOSE)
+                    .append("</tr>");
         }
         htmlContent.append("</table>");
 
