@@ -1,6 +1,6 @@
 # Daily Number Scraper
 
-This Java project scrapes numbers from a specified URL and saves them into a CSV file for further analysis. The project uses the OkHttp library for making HTTP requests and Jsoup for parsing HTML content. Additionally, it includes a workflow for sending weekly analysis reports via email.
+This Java project scrapes numbers from a specified URL and saves them into a CSV file for further analysis. The project uses Java's built-in HttpClient for making HTTP requests and Jsoup for parsing HTML content. Additionally, it includes a workflow for sending weekly analysis reports via email.
 
 ## Table of Contents
 
@@ -10,6 +10,7 @@ This Java project scrapes numbers from a specified URL and saves them into a CSV
 - [Data Analysis](#data-analysis)
 - [Workflows](#workflows)
 - [Acknowledgements](#acknowledgements)
+- [License](#license)
 
 ## Features
 
@@ -22,7 +23,7 @@ This Java project scrapes numbers from a specified URL and saves them into a CSV
 
 ## Technologies
 - Java 23
-- OkHttp (4.12.0)
+- Java's built-in HttpClient (for HTTP requests)
 - Jsoup (1.18.1)
 - Log4j (for logging)
 
@@ -104,6 +105,9 @@ This workflow runs every Monday at 3:00 UTC and sends an email with the HTML rep
 
 ## Acknowledgements
 
-- OkHttp for HTTP requests.
+- Java's HttpClient for HTTP requests.
 - Jsoup for HTML parsing.
 - Log4j for logging functionality.
+
+## License
+This project is licensed under the MIT License. See the LICENSE file for more details.
