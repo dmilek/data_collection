@@ -1,71 +1,58 @@
 package general_utils;
 
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.List;
 
-import static general_utils.ShutdownClient.shutdownClient;
-
 public class Scraper {
     private static final Logger logger = LogManager.getLogger(Scraper.class);
-    private static final String URL = "https://www.lutrija.hr/lotoigre/sve-ili-nista"; // Scraping URL
-
-    // Use a singleton instance for OkHttpClient to reduce resource overhead
-    private static final OkHttpClient client = new OkHttpClient.Builder()
-            .retryOnConnectionFailure(false)
+    private static final String URL = "https://www.lutrija.hr/lotoigre/sve-ili-nista";
+    private static final HttpClient client = HttpClient.newBuilder()
+            .connectTimeout(java.time.Duration.ofSeconds(30))
             .build();
 
-    private Scraper(){
+    private Scraper() {
     }
-    // Number scraping function
-    public static List<Integer> scrapeNumbers() throws IOException {
+
+    public static List<Integer> scrapeNumbers() throws IOException, InterruptedException {
         List<Integer> numbers = new ArrayList<>();
 
-        // Create a request
-        Request request = new Request.Builder()
-                .url(URL)
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(URL))
+                .GET()
                 .build();
 
-        // Send request and download HTML content
-        try (Response response = client.newCall(request).execute()) {
-            if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-            // Check if the response body is not null
-            if (response.body() != null) {
-                // Pass HTML content to JSoup
-                String html = response.body().string();
-                Document document = Jsoup.parse(html);
+        if (response.statusCode() == 200) {
+            String html = response.body();
+            Document document = Jsoup.parse(html);
 
-                // Find the section that says "results"
-                String scriptContent = document.getElementsByTag("script").html();
+            String scriptContent = document.getElementsByTag("script").html();
 
-                // Search for the result in the script
-                String resultsStart = "\"results\":[[";
-                int start = scriptContent.indexOf(resultsStart);
-                if (start != -1) {
-                    int end = scriptContent.indexOf("]]", start);
-                    String resultString = scriptContent.substring(start + resultsStart.length(), end);
-                    String[] resultNumbers = resultString.split(",");
-                    for (String numberStr : resultNumbers) {
-                        numbers.add(Integer.parseInt(numberStr.trim()));
-                    }
-                } else {
-                    logger.info("No results found.");
+            String resultsStart = "\"results\":[[";
+            int start = scriptContent.indexOf(resultsStart);
+            if (start != -1) {
+                int end = scriptContent.indexOf("]]", start);
+                String resultString = scriptContent.substring(start + resultsStart.length(), end);
+                String[] resultNumbers = resultString.split(",");
+                for (String numberStr : resultNumbers) {
+                    numbers.add(Integer.parseInt(numberStr.trim()));
                 }
             } else {
-                logger.info("The response body is null.");
+                logger.info("No results found.");
             }
-        } finally {
-            // Ensure the OkHttp client is properly shut down to release all resources
-            shutdownClient(client);
+        } else {
+            logger.error("Failed to retrieve data. Status code: {}", response.statusCode());
         }
 
         return numbers;

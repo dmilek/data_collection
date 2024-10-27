@@ -18,7 +18,12 @@ public class DailyScraper {
             CsvWriter.saveNumbersToCsv(numbers);
 
         } catch (IOException e) {
-            logger.error(e);
+            logger.error("IOException occurred:", e);
+        } catch (InterruptedException e) {
+            logger.error("Thread was interrupted:", e);
+
+            // Re-interrupt the current thread to maintain interrupt status
+            Thread.currentThread().interrupt();
         }
     }
 }
