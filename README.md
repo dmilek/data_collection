@@ -110,4 +110,4 @@ This workflow runs every Monday at 3:00 UTC and sends an email with the HTML rep
 - Log4j for logging functionality.
 
 ## License
-This project is licensed under the MIT License. See the LICENSE file for more details.
+![License: CC BY-NC 4.0](https://img.shields.io/badge/License-CC%20BY--NC%204.0-lightgrey)
