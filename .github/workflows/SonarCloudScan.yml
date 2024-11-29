@@ -1,13 +1,15 @@
-name: SonarCloud Analysis for Python
+name: SonarCloud Scan - Java
 
 on:
-  workflow_dispatch:  # Allows for manual triggering
+  workflow_dispatch:  # Allows manual trigger via GitHub UI
   push:
     branches:
-      - main  # Trigger on pushes to the main branch
+      - main  # Trigger scan on push to the main branch
   pull_request:
     branches:
-      - main  # Trigger on pull requests to the main branch
+      - main  # Trigger scan on pull requests targeting the main branch
+  schedule:
+    - cron: '0 0 * * 1'  # Every Monday at midnight UTC
 
 jobs:
   sonarcloud:
@@ -15,59 +17,57 @@ jobs:
 
     steps:
       # Step 1: Checkout the repository code
-      - name: Checkout code
+      - name: Checkout Code
         uses: actions/checkout@v3
+        # Fetches the repository code for analysis
 
-      # Step 2: Set up Python
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      # Step 2: Set up Java environment
+      - name: Set up Java
+        uses: actions/setup-java@v3
         with:
-          python-version: '3.13'  # Specify the Python version
+          java-version: '23'
+          distribution: 'adopt'  # or 'zulu', 'adoptium', 'oracle', etc.
+          java-package: jdk
+        # Ensures the correct Java version is available for the project
 
-      # Step 3: Cache Python dependencies
-      - name: Cache pip
+      # Step 3: Cache Maven dependencies
+      - name: Cache Maven Dependencies
         uses: actions/cache@v3
         with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          path: ~/.m2/repository  # Cache Maven dependencies to speed up builds
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}  # Cache key based on pom.xml
           restore-keys: |
-            ${{ runner.os }}-pip-
+            ${{ runner.os }}-maven-
+        # Saves time by caching Maven dependencies across runs
 
-      # Step 4: Install dependencies
-      - name: Install dependencies
+      # Step 4: Build the project
+      - name: Build Project
+        run: mvn clean install -DskipTests
+        # Builds the project, skips tests to avoid redundant tests before SonarCloud scan
+
+      # Step 5: Install SonarScanner CLI
+      - name: Install SonarScanner CLI
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-
-      # Step 5: Install curl and unzip for SonarScanner CLI
-      - name: Install curl and unzip
-        run: sudo apt-get install -y curl unzip
-
-      # Step 6: Define SonarScanner version
-      - name: Define SonarScanner version
-        run: echo "SONAR_SCANNER_VERSION=5.0.1.3006" >> $GITHUB_ENV
-
-      # Step 7: Download and install SonarScanner CLI
-      - name: Install SonarScanner
-        run: |
-          curl -sSLo sonar-scanner-cli.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-${{ env.SONAR_SCANNER_VERSION }}-linux.zip
+          # Define SonarScanner version
+          SONAR_SCANNER_VERSION="5.0.1.3006"
+          curl -sSLo sonar-scanner-cli.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-${SONAR_SCANNER_VERSION}-linux.zip
           unzip sonar-scanner-cli.zip
-          mv sonar-scanner-${{ env.SONAR_SCANNER_VERSION }}-linux sonar-scanner
+          mv sonar-scanner-${SONAR_SCANNER_VERSION}-linux sonar-scanner
           echo "$(pwd)/sonar-scanner/bin" >> $GITHUB_PATH
+        # Downloads and installs the specified version of SonarScanner
 
-      # Step 8: Verify SonarScanner Installation
+      # Step 6: Verify SonarScanner Installation
       - name: Verify SonarScanner Installation
         run: sonar-scanner --version
+        # Verifies that SonarScanner is installed and accessible
 
-      # Step 9: Run SonarCloud Analysis
-      - name: Run SonarCloud Analysis
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_ORG_KEY: ${{ secrets.SONAR_ORG_KEY }}
-          SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
+      # Step 7: Run SonarCloud Analysis
+      - name: Run SonarCloud Scan
         run: |
-          sonar-scanner \
-            -Dsonar.projectKey=$SONAR_PROJECT_KEY \
-            -Dsonar.organization=$SONAR_ORG_KEY \
+          mvn sonar:sonar \
+            -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }} \
+            -Dsonar.organization=${{ secrets.SONAR_ORG_KEY }} \
             -Dsonar.host.url=https://sonarcloud.io \
-            -Dsonar.login=$SONAR_TOKEN
+            -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
+            -Dsonar.java.binaries=target/classes
+        # Analyzes the Java project and uploads results to SonarCloud
