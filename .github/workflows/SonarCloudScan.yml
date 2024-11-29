@@ -1,15 +1,13 @@
-name: SonarCloud Scan - Java
+name: SonarCloud Analysis for Python
 
 on:
-  workflow_dispatch:  # Allows manual trigger via GitHub UI
+  workflow_dispatch:  # Allows for manual triggering
   push:
     branches:
-      - main  # Trigger scan on push to the main branch
+      - main  # Trigger on pushes to the main branch
   pull_request:
     branches:
-      - main  # Trigger scan on pull requests targeting the main branch
-  schedule:
-    - cron: '0 0 * * 1'  # Every Monday at midnight UTC
+      - main  # Trigger on pull requests to the main branch
 
 jobs:
   sonarcloud:
@@ -17,42 +15,59 @@ jobs:
 
     steps:
       # Step 1: Checkout the repository code
-      - name: Checkout Code
+      - name: Checkout code
         uses: actions/checkout@v3
-        # Fetches the repository code for analysis
 
-      # Step 2: Set up Java environment
-      - name: Set up Java
-        uses: actions/setup-java@v3
+      # Step 2: Set up Python
+      - name: Set up Python
+        uses: actions/setup-python@v4
         with:
-          java-version: '23'
-          distribution: 'adopt'  # or 'zulu', 'adoptium', 'oracle', etc.
-          java-package: jdk
-        # Ensures the correct Java version is available for the project
+          python-version: '3.13'  # Specify the Python version
 
-      # Step 3: Cache Maven dependencies
-      - name: Cache Maven Dependencies
+      # Step 3: Cache Python dependencies
+      - name: Cache pip
         uses: actions/cache@v3
         with:
-          path: ~/.m2/repository  # Cache Maven dependencies to speed up builds
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}  # Cache key based on pom.xml
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
           restore-keys: |
-            ${{ runner.os }}-maven-
-        # Saves time by caching Maven dependencies across runs
+            ${{ runner.os }}-pip-
 
-      # Step 4: Build the project
-      - name: Build Project
-        run: mvn clean install -DskipTests
-        # Builds the project, skips tests to avoid redundant tests before SonarCloud scan
-
-      # Step 5: Run SonarCloud Analysis
-      - name: Run SonarCloud Scan
+      # Step 4: Install dependencies
+      - name: Install dependencies
         run: |
-          mvn sonar:sonar \
-            -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }} \
-            -Dsonar.organization=${{ secrets.SONAR_ORG_KEY }} \
-            -Dsonar.host.url=https://sonarcloud.io \
-            -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
-            -Dsonar.java.binaries=target/classes
-        # Analyzes the Java project and uploads results to SonarCloud
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
+      # Step 5: Install curl and unzip for SonarScanner CLI
+      - name: Install curl and unzip
+        run: sudo apt-get install -y curl unzip
+
+      # Step 6: Define SonarScanner version
+      - name: Define SonarScanner version
+        run: echo "SONAR_SCANNER_VERSION=5.0.1.3006" >> $GITHUB_ENV
+
+      # Step 7: Download and install SonarScanner CLI
+      - name: Install SonarScanner
+        run: |
+          curl -sSLo sonar-scanner-cli.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-${{ env.SONAR_SCANNER_VERSION }}-linux.zip
+          unzip sonar-scanner-cli.zip
+          mv sonar-scanner-${{ env.SONAR_SCANNER_VERSION }}-linux sonar-scanner
+          echo "$(pwd)/sonar-scanner/bin" >> $GITHUB_PATH
+
+      # Step 8: Verify SonarScanner Installation
+      - name: Verify SonarScanner Installation
+        run: sonar-scanner --version
+
+      # Step 9: Run SonarCloud Analysis
+      - name: Run SonarCloud Analysis
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_ORG_KEY: ${{ secrets.SONAR_ORG_KEY }}
+          SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
+        run: |
+          sonar-scanner \
+            -Dsonar.projectKey=$SONAR_PROJECT_KEY \
+            -Dsonar.organization=$SONAR_ORG_KEY \
+            -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.login=$SONAR_TOKEN
