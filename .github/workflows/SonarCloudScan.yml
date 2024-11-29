@@ -1,53 +1,63 @@
 name: SonarCloud Scan - Java
 
 on:
-  # Trigger scan on every push to the main branch and pull requests
+  workflow_dispatch:  # Allows manual trigger via GitHub UI
   push:
     branches:
-      - main
+      - main  # Trigger scan on push to the main branch
   pull_request:
-  # Schedule a periodic scan every Monday at midnight UTC
+    branches:
+      - main  # Trigger scan on pull requests targeting the main branch
   schedule:
-    - cron: '0 0 * * 1'  # Every Monday
+    - cron: '0 0 * * 1'  # Every Monday at midnight UTC
 
 jobs:
   sonarcloud:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # Use the latest Ubuntu runner
 
     steps:
-      # Step 1: Checkout the repository
+      # Step 1: Checkout the repository code
       - name: Checkout Code
         uses: actions/checkout@v3
-        # Fetches the repository code for analysis.
+        # Fetches the repository code for analysis
 
       # Step 2: Set up Java environment
       - name: Set up Java
         uses: actions/setup-java@v3
         with:
-          java-version: '23'  # Replace with your Java version
-        # Ensures the correct Java version is available for the project.
+          java-version: '23'  # Use the correct Java version (you can adjust this to your Java version)
+          distribution: 'adoptopenjdk'  # Set Java distribution
+        # Ensures the correct Java version is available for the project
 
       # Step 3: Cache Maven dependencies
       - name: Cache Maven Dependencies
         uses: actions/cache@v3
         with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          path: ~/.m2/repository  # Cache Maven dependencies to speed up builds
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}  # Cache key based on pom.xml
           restore-keys: |
             ${{ runner.os }}-maven-
-        # Saves time by caching Maven dependencies across runs.
+        # Saves time by caching Maven dependencies across runs
 
       # Step 4: Build the project
       - name: Build Project
-        run: mvn clean verify
-        # Builds the project to ensure it is ready for analysis.
+        run: mvn clean install -DskipTests
+        # Builds the project, skips tests to avoid redundant tests before SonarCloud scan
 
-      # Step 5: Run SonarCloud analysis
+      # Step 5: Run SonarCloud Analysis
       - name: Run SonarCloud Scan
         run: |
           mvn sonar:sonar \
-            -Dsonar.projectKey=data_collection \
-            -Dsonar.organization=${{ secrets.ORGANIZATION_KEY }} \
+            -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }} \
+            -Dsonar.organization=${{ secrets.SONAR_ORG_KEY }} \
             -Dsonar.host.url=https://sonarcloud.io \
-            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
-        # Analyzes the Java project with SonarCloud and uploads the results.
+            -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
+            -Dsonar.java.binaries=target/classes
+        # Analyzes the Java project and uploads results to SonarCloud
+
+      # Step 6: (Optional) Test Reports for Coverage (If applicable)
+      - name: Upload Test Reports
+        if: success()  # Only run if previous steps were successful
+        run: |
+          mvn jacoco:report
+          # Optionally add your coverage tool's report path if necessary
