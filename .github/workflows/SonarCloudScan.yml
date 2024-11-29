@@ -1,0 +1,53 @@
+name: SonarCloud Scan - Java
+
+on:
+  # Trigger scan on every push to the main branch and pull requests
+  push:
+    branches:
+      - main
+  pull_request:
+  # Schedule a periodic scan every Monday at midnight UTC
+  schedule:
+    - cron: '0 0 * * 1'  # Every Monday
+
+jobs:
+  sonarcloud:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        # Fetches the repository code for analysis.
+
+      # Step 2: Set up Java environment
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: '23'  # Replace with your Java version
+        # Ensures the correct Java version is available for the project.
+
+      # Step 3: Cache Maven dependencies
+      - name: Cache Maven Dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+        # Saves time by caching Maven dependencies across runs.
+
+      # Step 4: Build the project
+      - name: Build Project
+        run: mvn clean verify
+        # Builds the project to ensure it is ready for analysis.
+
+      # Step 5: Run SonarCloud analysis
+      - name: Run SonarCloud Scan
+        run: |
+          mvn sonar:sonar \
+            -Dsonar.projectKey=data_collection \
+            -Dsonar.organization=${{ secrets.ORGANIZATION_KEY }} \
+            -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+        # Analyzes the Java project with SonarCloud and uploads the results.
