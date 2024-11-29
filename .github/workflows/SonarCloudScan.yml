@@ -56,9 +56,3 @@ jobs:
             -Dsonar.java.binaries=target/classes
         # Analyzes the Java project and uploads results to SonarCloud
 
-      # Step 6: (Optional) Test Reports for Coverage (If applicable)
-      - name: Upload Test Reports
-        if: success()  # Only run if previous steps were successful
-        run: |
-          mvn jacoco:report
-          # Optionally add your coverage tool's report path if necessary
