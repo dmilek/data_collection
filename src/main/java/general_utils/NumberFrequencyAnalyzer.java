@@ -33,7 +33,7 @@ public class NumberFrequencyAnalyzer {
             CsvAnalyzer.printFrequentSubsequences(subsequenceFrequency);
 
             // Call the HtmlReportGenerator to generate the HTML report (static method call)
-            String htmlReport = HtmlReportGenerator.generateHtmlReport(numberFrequency, subsequenceFrequency);
+            String htmlReport = HtmlReportGenerator.generateHtmlReport(numberFrequency);
             logger.info("Generated HTML Report: \n{}", htmlReport); // Log the HTML report
 
         } catch (IOException e) {
