@@ -81,16 +81,14 @@ The `NumberFrequencyAnalyzer` class is responsible for analyzing the numbers sto
 
 - **Frequency Analysis**: It counts the frequency of each number appearing in the CSV file.
 - **Subsequence Analysis**: It identifies subsequences of numbers that appear in multiple rows.
-- **HTML Report Generation**: Creates an HTML report showing a table of numbers and their respective frequencies as well as identified subsequences.
+- **HTML Report Generation**: Creates an HTML report showing a table of numbers and their respective frequencies.
 - **Logging**: Logs the frequency analysis and HTML report.
 
 ### Example Output (Logged):
 
 When you run the analyzer, you can expect output similar to the following:
 ```
-INFO CsvAnalyzer - Numbers sorted by frequency: INFO CsvAnalyzer - Number 5 appears 10 times. INFO CsvAnalyzer - Number 14 appears 8 times. INFO CsvAnalyzer - Number 3 appears 7 times. INFO CsvAnalyzer - Subsequence [1, 2, 3, 4] appears 3 times. INFO HtmlReportGenerator - Generated HTML Report:
-
-<html> <head> <title>Weekly Number Analysis Report</title> <style> /* CSS styles */ </style> </head> <body> <h1>Weekly Number Analysis Report</h1> <table> <tr><th>Number</th><th>Frequency</th></tr> <tr><td>5</td><td>10</td></tr> <tr><td>14</td><td>8</td></tr> <tr><td>3</td><td>7</td></tr> </table> <h2>Subsequence Analysis</h2> <table> <tr><th>Subsequence</th><th>Frequency</th></tr> <tr><td>[1, 2, 3, 4]</td><td>3</td></tr> <tr><td>[7, 8, 9]</td><td>2</td></tr> </table> </body> </html>
+<html> <head> <title>Weekly Number Analysis Report</title> <style> /* CSS styles */ </style> </head> <body> <h1>Weekly Number Analysis Report</h1> <table> <tr><th>Number</th><th>Frequency</th></tr> <tr><td>5</td><td>10</td></tr> <tr><td>14</td><td>8</td></tr> <tr><td>3</td><td>7</td></tr> </table>
 ```
   
 ## Workflows
