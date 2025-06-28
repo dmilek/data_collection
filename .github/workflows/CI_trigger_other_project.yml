@@ -4,7 +4,46 @@ on:
   workflow_dispatch: # Allows for manual workflow trigger
 
 jobs:
+  check-secrets:
+    runs-on: ubuntu-latest
+    outputs:
+      all_secrets_exist: ${{ steps.check.outputs.all_secrets_exist }}
+    steps:
+      - name: Check if required secrets are present
+        id: check
+        run: |
+          echo "Checking required secrets..."
+          missing=0
+
+          check_secret() {
+            if [ -z "${{ secrets[$1] }}" ]; then
+              echo "❌ Secret '$1' is MISSING"
+              missing=1
+            else
+              echo "✅ Secret '$1' is PRESENT"
+            fi
+          }
+
+          check_secret FINE_GRAINED_PAT
+          check_secret REPO_OWNER
+          check_secret REPO_NAME
+          check_secret DATA_FILE_PATH
+          check_secret EMAIL_USERNAME
+          check_secret EMAIL_PASSWORD
+          check_secret EMAIL_RECIPIENT
+
+          if [ "$missing" -eq 1 ]; then
+            echo "Some secrets are missing."
+            echo "all_secrets_exist=false" >> "$GITHUB_OUTPUT"
+            exit 1
+          else
+            echo "All secrets are present."
+            echo "all_secrets_exist=true" >> "$GITHUB_OUTPUT"
+          fi
+
   trigger-project-b:
+    needs: check-secrets
+    if: needs.check-secrets.outputs.all_secrets_exist == 'true'
     uses: dmilek/sequence_forecaster/.github/workflows/CI_test_workflow_call.yml@main
     secrets:
       FINE_GRAINED_PAT: ${{ secrets.FINE_GRAINED_PAT }}
