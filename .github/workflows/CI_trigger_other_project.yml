@@ -6,4 +6,11 @@ on:
 jobs:
   trigger-project-b:
     uses: dmilek/sequence_forecaster/.github/workflows/CI_test_workflow_call.yml@main
-    secrets: inherit
+    secrets:
+      FINE_GRAINED_PAT: ${{ secrets.FINE_GRAINED_PAT }}
+      REPO_OWNER: ${{ secrets.REPO_OWNER }}
+      REPO_NAME: ${{ secrets.REPO_NAME }}
+      DATA_FILE_PATH: ${{ secrets.DATA_FILE_PATH }}
+      EMAIL_USERNAME: ${{ secrets.EMAIL_USERNAME }}
+      EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+      EMAIL_RECIPIENT: ${{ secrets.EMAIL_RECIPIENT }}
