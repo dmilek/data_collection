@@ -1,5 +1,3 @@
-# .github/workflows/trigger_project_b.yml in Project A
-
 name: Trigger Project B Workflow
 
 on:
@@ -18,3 +16,10 @@ jobs:
             -H "Authorization: Bearer $PAT" \
             https://api.github.com/repos/dmilek/sequence_forecaster/actions/workflows/CI_test_workflow_call.yml/dispatches \
             -d '{"ref":"main"}'
+
+  run-if-success:
+    needs: trigger-project-b  # This ensures it runs only if previous job succeeds
+    runs-on: ubuntu-latest
+    steps:
+      - name: Continue after successful trigger
+        run: echo "Successfully triggered Project B, continuing workflow..."
