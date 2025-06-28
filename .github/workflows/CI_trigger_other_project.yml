@@ -5,5 +5,5 @@ on:
 
 jobs:
   trigger-project-b:
-    uses: dmilek/sequence_forecaster/.github/workflows/reusable.yml@main
+    uses: dmilek/sequence_forecaster/.github/workflows/CI_test_workflow_call.yml@main
     secrets: inherit
