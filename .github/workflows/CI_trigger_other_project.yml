@@ -1,57 +1,20 @@
-name: Trigger other project
+# .github/workflows/trigger_project_b.yml in Project A
+
+name: Trigger Project B Workflow
 
 on:
-  workflow_dispatch:
+  workflow_dispatch: # manual trigger
 
 jobs:
-  check-secrets:
-    runs-on: ubuntu-latest
-    outputs:
-      all_secrets_exist: ${{ steps.check.outputs.all_secrets_exist }}
-    steps:
-      - name: Check if required secrets are present
-        id: check
-        run: |
-          echo "Checking required secrets..."
-          missing=0
-
-          if [ -z "${{ secrets.FINE_GRAINED_PAT }}" ]; then
-            echo "❌ FINE_GRAINED_PAT is missing"; missing=1; else echo "✅ FINE_GRAINED_PAT exists"; fi
-
-          if [ -z "${{ secrets.REPO_OWNER }}" ]; then
-            echo "❌ REPO_OWNER is missing"; missing=1; else echo "✅ REPO_OWNER exists"; fi
-
-          if [ -z "${{ secrets.REPO_NAME }}" ]; then
-            echo "❌ REPO_NAME is missing"; missing=1; else echo "✅ REPO_NAME exists"; fi
-
-          if [ -z "${{ secrets.DATA_FILE_PATH }}" ]; then
-            echo "❌ DATA_FILE_PATH is missing"; missing=1; else echo "✅ DATA_FILE_PATH exists"; fi
-
-          if [ -z "${{ secrets.EMAIL_USERNAME }}" ]; then
-            echo "❌ EMAIL_USERNAME is missing"; missing=1; else echo "✅ EMAIL_USERNAME exists"; fi
-
-          if [ -z "${{ secrets.EMAIL_PASSWORD }}" ]; then
-            echo "❌ EMAIL_PASSWORD is missing"; missing=1; else echo "✅ EMAIL_PASSWORD exists"; fi
-
-          if [ -z "${{ secrets.EMAIL_RECIPIENT }}" ]; then
-            echo "❌ EMAIL_RECIPIENT is missing"; missing=1; else echo "✅ EMAIL_RECIPIENT exists"; fi
-
-          if [ "$missing" -eq 1 ]; then
-            echo "all_secrets_exist=false" >> "$GITHUB_OUTPUT"
-            exit 1
-          else
-            echo "all_secrets_exist=true" >> "$GITHUB_OUTPUT"
-          fi
-
   trigger-project-b:
-    needs: check-secrets
-    if: needs.check-secrets.outputs.all_secrets_exist == 'true'
-    uses: dmilek/sequence_forecaster/.github/workflows/CI_test_workflow_call.yml@main
-    secrets:
-      FINE_GRAINED_PAT: ${{ secrets.FINE_GRAINED_PAT }}
-      REPO_OWNER: ${{ secrets.REPO_OWNER }}
-      REPO_NAME: ${{ secrets.REPO_NAME }}
-      DATA_FILE_PATH: ${{ secrets.DATA_FILE_PATH }}
-      EMAIL_USERNAME: ${{ secrets.EMAIL_USERNAME }}
-      EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
-      EMAIL_RECIPIENT: ${{ secrets.EMAIL_RECIPIENT }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Project B workflow via GitHub API
+        env:
+          PAT: ${{ secrets.PERSONAL_ACCESS_TOKEN }}  # PAT with repo and workflow permissions
+        run: |
+          curl -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer $PAT" \
+            https://api.github.com/repos/dmilek/sequence_forecaster/actions/workflows/CI_test_workflow_call.yml/dispatches \
+            -d '{"ref":"main"}'
