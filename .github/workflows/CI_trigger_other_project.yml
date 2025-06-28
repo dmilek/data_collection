@@ -1,0 +1,11 @@
+name: Trigger other project
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  trigger-project-b:
+    uses: dmilek/project-b-repo-name/.github/workflows/reusable.yml@main
+    secrets: inherit
