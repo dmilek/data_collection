@@ -33,6 +33,8 @@ public class Scraper {
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
+        logger.info("Response body: {}", response.body()); // Log the full response body
+
         if (response.statusCode() == 200) {
             String html = response.body();
             Document document = Jsoup.parse(html);
