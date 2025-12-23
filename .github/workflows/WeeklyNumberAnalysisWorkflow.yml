@@ -2,8 +2,8 @@ name: Weekly Number Analysis
 
 on:
   workflow_dispatch: # Allows for manual workflow trigger
-  schedule:
-    - cron: '0 3 * * 1' # Run every Monday at 03:00 UTC
+  # schedule:
+  #   - cron: '0 3 * * 1' # Run every Monday at 03:00 UTC
 
 jobs:
   analyze:
